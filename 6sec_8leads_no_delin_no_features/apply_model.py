@@ -43,8 +43,10 @@ def write_results(results):
 
             reference = ", ".join(str(x) for x in data_reference_dict[name])
             writer.writerow([idx + 1, name, reference, value, value in data_reference_dict[name]])
+        result_accuracy = correct_predictions / len(results)
         writer.writerow([len(results), '', '', '', correct_predictions / len(results)])
         csvfile.close()
+    return result_accuracy
 
 
 def main():
@@ -69,7 +71,9 @@ def main():
         result = load_and_predict_data_sample(data_path)
         results[name] = result
 
-    write_results(results)
+    result_accuracy = write_results(results)
+
+    print('Result accuracy:', result_accuracy)
 
 
 if __name__ == "__main__":

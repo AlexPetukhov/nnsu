@@ -32,9 +32,9 @@ def get_conv_model(filter_means, input_layer):
 def model_many_diseases2():
     input_layer = L.Input(shape=(3000, 8))
 
-    model_12 = get_conv_model(np.array([32, 64, 32]), input_layer)
+    model_12 = get_conv_model(np.array([32, 32, 32]), input_layer)
 
-    dense_out1 = L.Dense(64, activation='relu')(model_12)
+    dense_out1 = L.Dense(512, activation='relu')(model_12)
     dense_out2 = L.Dense(9)(dense_out1)
 
     model = keras.Model(input_layer, [dense_out2])
@@ -60,9 +60,9 @@ def main():
     model.compile(loss=SparseCategoricalCrossentropy(from_logits=True), optimizer='adam', metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto', restore_best_weights=True,
+        EarlyStopping(monitor='val_loss', patience=7, verbose=0, mode='auto', restore_best_weights=True,
                       min_delta=0.01),
-        ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, verbose=1, epsilon=1e-4, mode='min')
+        ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=3, verbose=1, epsilon=1e-4, mode='auto')
     ]
     model.fit(generator_st(x_train=x_train, y_train=y_train, batch_size=128),
               epochs=120, steps_per_epoch=120, callbacks=callbacks,
