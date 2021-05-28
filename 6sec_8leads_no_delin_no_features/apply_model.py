@@ -17,17 +17,30 @@ def load_and_predict_data_for_one_slice(data_path, start_t, end_t):
     return result.tolist()[0]
 
 
-def load_and_predict_data_sample(data_path):
+def load_and_predict_data_sample(data_path, slice_length):
     data = sio.loadmat(data_path)
     signal = data['ECG']['data'][0][0]
     max_len = signal.shape[1]
 
     answer_list = [0] * 9
-    for start_t in range(0, max_len - 3000, 500):
-        res = load_and_predict_data_for_one_slice(data_path, start_t, start_t + 3000)
+    for start_t in range(0, max_len - slice_length, 500):
+        res = load_and_predict_data_for_one_slice(data_path, start_t, start_t + slice_length)
         answer_list = [x + y for x, y in zip(answer_list, res)]
     answer = np.argmax(answer_list) + 1
     return answer
+
+
+def prepare_results(data_list, slice_length):
+    results = {}
+    for idx, data in enumerate(data_list):
+        name = data.split('.')[0]
+        if idx % (len(data_list) / 10) == 0:
+            print(name)
+
+        data_path = os.path.join(validation_path, data)
+        result = load_and_predict_data_sample(data_path, slice_length)
+        results[name] = result
+    return results
 
 
 def write_results(results):
@@ -56,20 +69,12 @@ def main():
     model = load_model("models/tmp/model.h5")
     validation_path = '../DATA/validation_set'
 
+    model.summary()
+
     data_list = get_sorted_data_list(validation_path)
     print('data_list size:', len(data_list))
 
-    model.summary()
-
-    results = {}
-    for idx, data in enumerate(data_list):
-        name = data.split('.')[0]
-        if idx % (len(data_list) / 10) == 0:
-            print(name)
-
-        data_path = os.path.join(validation_path, data)
-        result = load_and_predict_data_sample(data_path)
-        results[name] = result
+    results = prepare_results(data_list, slice_length=3000)
 
     result_accuracy = write_results(results)
 

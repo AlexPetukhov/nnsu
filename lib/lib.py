@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 import scipy.io as sio
 
-need_leads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+# need_leads = [1, 2, 6, 7, 8, 9, 10, 11]
+need_leads = [1, 2, 6, 7, 8, 9, 10, 11]
 
 
 def get_signal_slice(record_path, start_t, end_t):

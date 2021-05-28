@@ -29,10 +29,11 @@ def get_conv_model(filter_means, input_layer, dropout_rate):
     return L.Flatten()(drop)
 
 
-def model_many_diseases2(dropout_rate):
-    input_layer = L.Input(shape=(3000, 12))
+def model_many_diseases2(dropout_rate, slice_len, need_leads):
+    num_leads = len(need_leads)
+    input_layer = L.Input(shape=(slice_len, num_leads))
 
-    model_12 = get_conv_model(np.array([32, 32]), input_layer, dropout_rate)
+    model_12 = get_conv_model(np.array([32, 64]), input_layer, dropout_rate)
 
     dense_out1 = L.Dense(512, activation='relu')(model_12)
     dense_out2 = L.Dense(9)(dense_out1)
@@ -58,7 +59,7 @@ def main():
     print('X_val', X_val.shape)
     print('y_val', y_val.shape)
 
-    model = model_many_diseases2(dropout_rate=0.25)
+    model = model_many_diseases2(dropout_rate=0.25, slice_len=3000, need_leads=need_leads)
     model.summary()
     model.compile(loss=SparseCategoricalCrossentropy(from_logits=True), optimizer='adam', metrics=['accuracy'])
 
