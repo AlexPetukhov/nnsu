@@ -20,7 +20,7 @@ def get_conv_model(filter_means, input_layer, dropout_rate):
             conv = L.Conv1D(filters=filter_means[i], kernel_size=9, padding='same', strides=5, activation='relu')(
                 input_layer)
         else:
-            conv = L.Conv1D(filters=filter_means[i], kernel_size=9, padding='same', strides=5, activation='relu')(drop)
+            conv = L.Conv1D(filters=filter_means[i], kernel_size=9, padding='same', strides=5, activation='relu')(relu)
         drop = L.Dropout(dropout_rate)(conv)
         conv = L.Conv1D(filters=filter_means[i], kernel_size=9, padding='same', strides=5)(drop)
         batch = L.BatchNormalization()(conv)
