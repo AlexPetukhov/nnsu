@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import scipy.io as sio
 
-need_leads = [1, 2, 6, 7, 8, 9, 10, 11]
+need_leads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 
 def get_signal_slice(record_path, start_t, end_t):
@@ -49,19 +49,20 @@ def get_reference_dict(path: str, one_value_only: bool):
     return reference_dict
 
 
-def generator_st(x_train, y_train, batch_size):
+def generator_st(x_train, y_train, batch_size, slice_len, need_leads):
     # Create empty arrays to contain batch of features and label
-    batch_features_1 = np.zeros((batch_size, 3000, 8))
+    leads_num = len(need_leads)
+    batch_features_1 = np.zeros((batch_size, slice_len, leads_num))
     batch_labels = np.zeros(batch_size, dtype=int)
 
     while True:
         for i in range(batch_size):
             # choose random index in features
             index = np.random.choice(len(x_train))
-            x = x_train[index][:, :8]
-            shift = np.random.randint(0, len(x) - 3000 + 1, 1)[0]
+            x = x_train[index][:, :leads_num]
+            shift = np.random.randint(0, len(x) - slice_len + 1, 1)[0]
 
-            batch_features_1[i] = x[shift: shift + 3000]
+            batch_features_1[i] = x[shift: shift + slice_len]
             batch_labels[i] = y_train[index]
         yield batch_features_1, batch_labels
 

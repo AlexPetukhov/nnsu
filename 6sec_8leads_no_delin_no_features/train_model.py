@@ -30,7 +30,7 @@ def get_conv_model(filter_means, input_layer, dropout_rate):
 
 
 def model_many_diseases2(dropout_rate):
-    input_layer = L.Input(shape=(3000, 8))
+    input_layer = L.Input(shape=(3000, 12))
 
     model_12 = get_conv_model(np.array([32, 32]), input_layer, dropout_rate)
 
@@ -42,7 +42,7 @@ def model_many_diseases2(dropout_rate):
 
 
 def main():
-    # 6 sec, no delineation, no features
+    # 6 sec, no delineation, no features, 8 leads
     # using [[1,2,6,7,8,9,10,11],:] leads
     data_folder_path = '../DATA'
     train_folder_name = 'training_set'
@@ -52,17 +52,22 @@ def main():
     y_val = np.load(os.path.join(data_folder_path, '6sec/y_6sec.npy'))
     assert (len(X_val) == len(y_val))
     print('len of train data', len(x_train))
+    print('shapes:')
+    print('x_train', len(x_train), x_train[0].shape)
+    print('y_train', len(y_train))
+    print('X_val', X_val.shape)
+    print('y_val', y_val.shape)
 
-    model = model_many_diseases2(dropout_rate=0.15)
+    model = model_many_diseases2(dropout_rate=0.25)
     model.summary()
     model.compile(loss=SparseCategoricalCrossentropy(from_logits=True), optimizer='adam', metrics=['accuracy'])
 
     callbacks = [
-        EarlyStopping(monitor='val_loss', patience=7, verbose=0, mode='auto', restore_best_weights=True,
-                      min_delta=0.01),
+        EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto', restore_best_weights=True,
+                      min_delta=0.001),
         ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=3, verbose=1, min_delta=1e-4, mode='auto')
     ]
-    model.fit(generator_st(x_train=x_train, y_train=y_train, batch_size=128),
+    model.fit(generator_st(x_train=x_train, y_train=y_train, batch_size=128, slice_len=3000, need_leads=need_leads),
               epochs=120, steps_per_epoch=120, callbacks=callbacks,
               validation_data=(X_val[:, :, need_leads], y_val))
 
